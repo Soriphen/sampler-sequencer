@@ -469,8 +469,7 @@ export default function App() {
       track0: new Tone.Channel().toDestination().connect(wave.current), // This will connect the output of each track into wave in order to turn the audio into a Waveform object to extract its sample data for p5.js later on
       track1: new Tone.Channel().toDestination().connect(wave.current),
       track2: new Tone.Channel().toDestination().connect(wave.current),
-      track3: new Tone.Channel().toDestination().connect(wave.current),
-      track4: new Tone.Channel().toDestination().connect(wave.current)
+      track3: new Tone.Channel().toDestination().connect(wave.current)
     };
 
   const tracks = useRef();
@@ -492,23 +491,16 @@ export default function App() {
         name: Object.keys(sampleRef.bd)[0]
       },
       {
-        group: "bd",
-        sample: makePlayer(sampleRef.bd.BD2).connect(
-          trackChannels.current.track2
-        ),
-        name: Object.keys(sampleRef.bd)[1]
-      },
-      {
         group: "perc",
         sample: makePlayer(sampleRef.perc.PC1).connect(
-          trackChannels.current.track3
+          trackChannels.current.track2
         ),
         name: Object.keys(sampleRef.perc)[0]
       },
       {
         group: "patt",
         sample: makePlayer(sampleRef.patt.PT1).connect(
-          trackChannels.current.track4
+          trackChannels.current.track3
         ),
         name: Object.keys(sampleRef.patt)[0]
       }
@@ -803,25 +795,25 @@ export default function App() {
     ] = new Tone.Channel().toDestination().connect(wave.current);
     // This adds a new track
     tracks.current.push({
-      group: "bd",
-      sample: makePlayer(sampleRef.bd.BD1).connect(
+      group: "bass",
+      sample: makePlayer(sampleRef.bass.BS1).connect(
         trackChannels.current[
           "track" + (Object.keys(trackChannels.current).length - 1)
         ]
       ),
-      name: Object.keys(sampleRef.bd)[0]
+      name: Object.keys(sampleRef.bass)[0]
     });
     // This adds the 16 new cells for the new track
     newGrid = grid.map((column) => {
       let newColumn = [...column];
       newColumn.push({
-        group: "bd",
-        sample: makePlayer(sampleRef.bd.BD1).connect(
+        group: "bass",
+        sample: makePlayer(sampleRef.bass.BS1).connect(
           trackChannels.current[
             "track" + (Object.keys(trackChannels.current).length - 1)
           ]
         ),
-        name: Object.keys(sampleRef.bd)[0]
+        name: Object.keys(sampleRef.bass)[0]
       });
       return newColumn;
     });
@@ -829,15 +821,15 @@ export default function App() {
     newTrackActive = [...tracksSelect];
     newTrackActive.push({
       isActive: false,
-      group: "bd",
-      name: Object.keys(sampleRef.bd)[0]
+      group: "bass",
+      name: Object.keys(sampleRef.bass)[0]
     });
     // This adds a new tracksMute object for the new Track in order for it to have a mute function
     newTracksMute = [...tracksMute];
     newTracksMute.push({
       isActive: true,
-      group: "bd",
-      name: Object.keys(sampleRef.bd)[0]
+      group: "bass",
+      name: Object.keys(sampleRef.bass)[0]
     });
 
     setGrid(newGrid);
