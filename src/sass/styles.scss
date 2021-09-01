@@ -13,7 +13,6 @@
   
   #sequencer {
     padding: 10px;
-    overflow: auto;
     max-width: 100%;
     background: #dedddf;
     box-shadow: inset 3px 3px 5px #c3c2c4,
@@ -114,6 +113,7 @@
     #sample-container {
       display: flex;
       background: #dedddf;
+      overflow: auto;
       padding: 10px;
       border-radius: 4px;
       box-shadow: inset 3px 3px 5px #c3c2c4,
