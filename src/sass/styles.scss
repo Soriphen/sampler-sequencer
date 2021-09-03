@@ -368,6 +368,19 @@
   }
 }
 
+#track-group-modal {
+  width: 500px;
+  
+  @include media("<=510px") {
+    width: 100%;
+    flex-wrap: wrap;
+
+    button {
+      margin: 5px 0;
+    }
+  }
+}
+
 #sample-left {
   border: none;
   height: 100%;
