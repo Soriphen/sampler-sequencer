@@ -420,6 +420,8 @@ const RepeatableBtn = ({ onClick, minusOrPlus, ...props }) => {
 
 /************* Buttons Components End *************/
 
+/************* Helper Functions Beginning **************/
+
 function handleUpdate(tracks, grid, tracksSelect, tracksMute, trackClicked) {
   let newGrid, newTrackActive, newTracksMute;
   newGrid = grid.map((column) =>
@@ -456,6 +458,22 @@ function handleUpdate(tracks, grid, tracksSelect, tracksMute, trackClicked) {
     newTracksMute
   };
 }
+
+/* This is a helper function specifically to fix the issue 
+for when a trackChannel prop is deleted, 
+leaving the wrong key name for all props. 
+Basically, every trackChannel prop gets a renamed key that coincides with their "index value" so to speak.
+For example, {track0: Channel, track2: Channel, track3: Channel} 
+becomes {track0: Channel, track1: Channel, track2: Channel} */
+function renameKeys(obj) {
+  const keyValues = Object.keys(obj).map((key, index) => {
+    const newKey = "track" + index || key;
+    return { [newKey]: obj[key] };
+  });
+  return Object.assign({}, ...keyValues);
+}
+
+/************* Helper Functions End **************/
 
 export default function App() {
   const [title, setTitle] = useState("Untitled 1");
@@ -841,6 +859,7 @@ export default function App() {
     let newGrid, newTrackActive, newTracksMute;
     // This removes the selected channel from trackChannels
     delete trackChannels.current["track" + trackClicked];
+    trackChannels.current = renameKeys(trackChannels.current);
     // This removes the track
     tracks.current.splice(trackClicked, 1);
     // This adds the 16 new cells for the new track

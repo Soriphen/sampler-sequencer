@@ -1,5 +1,6 @@
 @use "./variablesMixins" as vMix;
 @import "~bootstrap/scss/bootstrap";
+@import "~include-media/dist/include-media";
 
 .App {
   font-family: sans-serif;
@@ -23,6 +24,10 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 10px;
+      
+      @include media("<=tablet") {
+        flex-direction: column;
+      }
 
       #title {
         border: none;
@@ -32,6 +37,10 @@
         background: #dedddf;
         box-shadow: inset 3px 3px 5px #c3c2c4,
             inset -3px -3px 5px #f9f8fa;
+        
+        @include media("<=tablet") {
+          width: 100%;
+        }
       }
       
       #play-button {
@@ -44,6 +53,11 @@
         box-shadow:  3px 3px 5px #9c9b9d,
              -3px -3px 5px #d4d1d5;
         color: vMix.$thunder;
+
+        @include media("<=tablet") {
+          width: 100%;
+          margin: 20px 0;
+        }
 
         &:hover {
           background: linear-gradient(145deg, #c5c3c6, #a6a4a7);
@@ -61,6 +75,10 @@
         background: #dedddf;
         box-shadow: inset 3px 3px 5px #c3c2c4,
             inset -3px -3px 5px #f9f8fa;
+        
+        @include media("<=tablet") {
+          width: 100%;
+        }
 
         #bpm-title {
           margin-right: 50px;
