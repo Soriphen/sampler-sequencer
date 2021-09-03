@@ -313,7 +313,7 @@ const TrackGroup = ({ handleGroupSelect, name, trackKey, trackIndex }) => {
       >
         <ModalBody
           className="d-flex justify-content-around"
-          style={{ width: "500px" }}
+          id={"track-group-modal"}
         >
           <button
             className="btn btn-danger d-flex justify-content-center align-items-center"
