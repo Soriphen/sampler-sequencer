@@ -22,182 +22,23 @@ import {
   patt3,
   patt4
 } from "./assets/rseq-sounds/index";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faArrowLeft,
-  faArrowRight,
-  faPlay,
-  faStop,
-  faPlus,
-  faMinus
-} from "@fortawesome/free-solid-svg-icons";
-import styled, { css, keyframes } from "styled-components";
-import Visualizer from "./components/Visualizer";
-import { DropdownButton, ModalBody } from "react-bootstrap";
-import Repeatable from "react-repeatable";
-
-/************* Styles Beginning *************/
-
-const StopIcon = <FontAwesomeIcon icon={faStop} />;
-const PlayIcon = <FontAwesomeIcon icon={faPlay} />;
-const RightArrow = <FontAwesomeIcon icon={faArrowRight} />;
-const LeftArrow = <FontAwesomeIcon icon={faArrowLeft} />;
-const PlusIcon = <FontAwesomeIcon icon={faPlus} />;
-const MinusIcon = <FontAwesomeIcon icon={faMinus} />;
-
-const TrackBtnContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-  ${(props) =>
-    props.isTrackOrMute &&
-    css`
-      .btn {
-        width: 100px;
-        height: 40px;
-
-        &::before {
-          content: "";
-          width: 140px;
-          height: 140px;
-          position: absolute;
-          top: 170%;
-          left: -10%;
-          border-radius: 45%;
-
-          animation: ${spin} 10s linear infinite;
-        }
-      }
-    `}
-`;
-
-const spin = keyframes`
-  0% {
-    transform: translate(-50%, -75%) rotate(0deg);
-  }
-  100% {
-    transform: translate(-50%, -75%) rotate(360deg);
-  }
-`;
-
-const TrackBtnStyle = styled.button`
-  position: relative;
-  display: flex;
-  align-items: center;
-  ${(props) => props.borderColor}
-
-  ${(props) => {
-    if (props.isTrackOrMute) {
-      return `
-        overflow: hidden;
-        &::before {
-          background-color: #dedddf;
-        }
-        &::after {
-          content: "${props.trackKey}";
-          color: #dedddf;
-          z-index: 1;
-          font-weight: 700;
-          font-size: 15px;
-          position: absolute;
-          bottom: 0;
-          right: 10%;
-        }
-        ${props.isActive && `${props.trackSelectColor}`}
-      `;
-    } else {
-      return `
-        &::after {
-          content: "";
-          height: ${props.isActive ? "6px" : "3px"};
-          width: ${props.isActive ? "23px" : "4px"};
-          position: absolute;
-          left: 104%;
-          background-color: ${props.inputColor || "black"};
-          transition: width 0.25s ease, height 0.08s ease;
-        }
-        &::before {
-          content: "";
-          height: 6px;
-          width: 7px;
-          position: absolute;
-          left: -22%;
-          background-color: ${props.inputColor || "black"};
-        }
-        &:hover::after {
-          height: 3px;
-          width: ${props.isActive ? "23px" : "7px"};
-        }
-      `;
-    }
-  }}
-`;
-
-const TrackInfoPane = styled.div`
-  display: flex;
-`;
-
-const TrackInfoStyle = styled.div`
-  display: flex;
-  border-radius: 4px;
-  color: #dedddf;
-  width: 100%;
-`;
-
-const RemoveButton = styled.button`
-  border: none;
-  display: flex;
-  color: #dedddf;
-  width: 50px;
-  height: 40px;
-  justify-content: center;
-  align-items: center;
-  border-radius: 4px;
-  background: linear-gradient(145deg, #313131, #292929);
-  box-shadow: 2px 2px 2px #2e2e2e, -2px -2px 2px #2e2e2e;
-
-  &:hover {
-    background: linear-gradient(145deg, #211e21, #1c191c);
-    box-shadow: 1px 1px 2px #1f1c1f, -1px -1px 2px #1f1c1f;
-  }
-`;
-
-/************* Styles End *************/
-
-/************* Grid, Track, and Players Function Beginnning *************/
-
-// This creates an information grid for each button on the sequencer to have their own info like whether they are active or not
-function makeGrid(samples) {
-  const grid = [];
-  for (let i = 0; i < 32; i++) {
-    let column = samples.map((val) => {
-      return {
-        sample: val.sample,
-        isActive: false,
-        group: val.group,
-        name: val.name
-      };
-    });
-    grid.push(column);
-  }
-  return grid;
-}
-
-function makeTracks(samples, isActive = false) {
-  let column = samples.map((val) => {
-    return {
-      isActive: isActive,
-      group: val.group,
-      name: val.name
-    };
-  });
-  return column;
-}
-
-function makePlayer(sample) {
-  const player = new Tone.Player(sample);
-  return player;
-}
+  TrackBtnContainer,
+  TrackInfoPane,
+  StopIcon,
+  PlayIcon,
+  PlusIcon,
+  MinusIcon
+} from "./components/TrackStyles";
+import { makeGrid, makeTracks, makePlayer } from "./components/MakeFunctions";
+import {
+  TrackSelectButton,
+  TrackInfo,
+  TrackMuteButton,
+  SampleButton,
+  RepeatableBtn
+} from "./components/Buttons";
+import { handleUpdate, renameKeys } from "./components/HelperFunctions";
 
 const sampleRef = {
   bass: { BS1: bass1 },
@@ -217,264 +58,6 @@ const sampleRef = {
   patt: { PT1: patt1, PT2: patt2, PT3: patt3, PT4: patt4 }
 };
 
-/************* Grid, Track, and Players Function End *************/
-
-/************* Buttons Components Beginning *************/
-
-const TrackSelectButton = ({
-  sample,
-  isActive,
-  group,
-  inputColor,
-  trackSelectColor,
-  borderColor,
-  trackKey,
-  handleRemoveTrack,
-  trackIndex,
-  ...rest
-}) => {
-  return (
-    <div className="d-flex align-items-center">
-      <RemoveButton onClick={() => handleRemoveTrack(trackIndex)}>
-        {MinusIcon}
-      </RemoveButton>
-      <TrackBtnStyle
-        className={classNames(
-          "btn btn-lg m-1",
-          { "btn-danger": group === "bass" },
-          { "btn-primary": group === "bd" },
-          { "btn-warning": group === "perc" },
-          { "btn-success": group === "patt" },
-          `${group + "-track"}`
-        )}
-        inputColor={inputColor(group)}
-        trackSelectColor={trackSelectColor(group)}
-        borderColor={borderColor(group)}
-        isActive={isActive}
-        isTrackOrMute={true}
-        trackKey={trackKey}
-        {...rest}
-      ></TrackBtnStyle>
-    </div>
-  );
-};
-
-const TrackInfo = ({
-  name,
-  isActive,
-  group,
-  inputColor,
-  trackKey,
-  wave,
-  sampleLeft,
-  sampleRight,
-  handleGroupSelect,
-  trackIndex
-}) => {
-  if (isActive) {
-    return (
-      <TrackInfoStyle // Takes props from TrackInfo to be passed as props to the styled-component TrackInfoStyle for dynamic styling purposes
-        inputColor={inputColor(group)}
-        isActive={isActive}
-      >
-        <div id="track-group-container">
-          <TrackGroup
-            handleGroupSelect={handleGroupSelect}
-            name={name}
-            trackKey={trackKey}
-            trackIndex={trackIndex}
-          ></TrackGroup>
-          <div
-            className="d-flex"
-            style={{ flex: "1", justifyContent: "flex-end" }}
-          >
-            <button className="btn" id="sample-left" onClick={sampleLeft}>
-              {LeftArrow}
-            </button>
-            <button className="btn" id="sample-right" onClick={sampleRight}>
-              {RightArrow}
-            </button>
-          </div>
-        </div>
-        <Visualizer inputColor={inputColor(group)} wave={wave} />
-      </TrackInfoStyle>
-    );
-  } else {
-    return null;
-  }
-};
-
-const TrackGroup = ({ handleGroupSelect, name, trackKey, trackIndex }) => {
-  return (
-    <>
-      <DropdownButton
-        id={"track-group-button"}
-        title={name + " Track " + trackKey}
-      >
-        <ModalBody
-          className="d-flex justify-content-around"
-          id={"track-group-modal"}
-        >
-          <button
-            className="btn btn-danger d-flex justify-content-center align-items-center"
-            style={{ height: "40px", width: "110px" }}
-            onClick={() => {
-              handleGroupSelect("bass", trackIndex);
-            }}
-          >
-            Bass
-          </button>
-          <button
-            className="btn btn-primary d-flex justify-content-center align-items-center"
-            style={{ height: "40px", width: "110px" }}
-            onClick={() => {
-              handleGroupSelect("bd", trackIndex);
-            }}
-          >
-            Bass Drum
-          </button>
-          <button
-            className="btn btn-warning d-flex justify-content-center align-items-center"
-            style={{ height: "40px", width: "110px", color: "white" }}
-            onClick={() => {
-              handleGroupSelect("perc", trackIndex);
-            }}
-          >
-            Percussion
-          </button>
-          <button
-            className="btn btn-success d-flex justify-content-center align-items-center"
-            style={{ height: "40px", width: "110px" }}
-            onClick={() => {
-              handleGroupSelect("patt", trackIndex);
-            }}
-          >
-            Pattern
-          </button>
-        </ModalBody>
-      </DropdownButton>
-    </>
-  );
-};
-
-const TrackMuteButton = ({
-  isActive,
-  group,
-  inputColor,
-  borderColor,
-  ...rest
-}) => {
-  return (
-    <TrackBtnStyle
-      className={classNames(
-        "btn btn-lg m-1 d-flex",
-        { "btn-danger": group === "bass" },
-        { "btn-primary": group === "bd" },
-        { "btn-warning": group === "perc" },
-        { "btn-success": group === "patt" },
-        `${group + "-mute"}`
-      )}
-      inputColor={inputColor(group)}
-      borderColor={borderColor(group)}
-      isActive={isActive}
-      isTrackOrMute={false}
-      {...rest}
-    ></TrackBtnStyle>
-  );
-};
-
-const SampleButton = ({ isActive, group, ...rest }) => {
-  return (
-    <button
-      className={classNames(
-        "btn btn-lg m-1",
-        { "btn-outline-danger": group === "bass" },
-        { "btn-outline-primary": group === "bd" },
-        { "btn-outline-warning": group === "perc" },
-        { "btn-outline-success": group === "patt" },
-        { "btn-danger": isActive && group === "bass" },
-        { "btn-primary": isActive && group === "bd" },
-        { "btn-warning": isActive && group === "perc" },
-        { "btn-success": isActive && group === "patt" }
-      )}
-      {...rest}
-    ></button>
-  );
-};
-
-const RepeatableBtn = ({ onClick, minusOrPlus, ...props }) => {
-  return (
-    <Repeatable
-      tag="button"
-      type="button"
-      onHold={() => {
-        minusOrPlus ? onClick(true) : onClick(false);
-      }}
-      onRelease={() => {
-        minusOrPlus ? onClick(true) : onClick(false);
-      }}
-      {...props}
-    ></Repeatable>
-  );
-};
-
-/************* Buttons Components End *************/
-
-/************* Helper Functions Beginning **************/
-
-function handleUpdate(tracks, grid, tracksSelect, tracksMute, trackClicked) {
-  let newGrid, newTrackActive, newTracksMute;
-  newGrid = grid.map((column) =>
-    column.map((cell, cellIndex) => {
-      let cellCopy = { ...cell };
-      if (cellIndex === trackClicked) {
-        cellCopy.sample = tracks.current[trackClicked].sample;
-        cellCopy.name = tracks.current[trackClicked].name;
-        cellCopy.group = tracks.current[trackClicked].group;
-      }
-      return cellCopy;
-    })
-  );
-  newTrackActive = tracksSelect.map((track) => {
-    let trackCopy = { ...track };
-    if (trackCopy.isActive) {
-      trackCopy.name = tracks.current[trackClicked].name;
-      trackCopy.group = tracks.current[trackClicked].group;
-    }
-    return trackCopy;
-  });
-  newTracksMute = tracksMute.map((track, trackIndex) => {
-    let trackCopy = { ...track };
-    if (trackIndex === trackClicked) {
-      trackCopy.name = tracks.current[trackClicked].name;
-      trackCopy.group = tracks.current[trackClicked].group;
-    }
-    return trackCopy;
-  });
-
-  return {
-    newGrid,
-    newTrackActive,
-    newTracksMute
-  };
-}
-
-/* This is a helper function specifically to fix the issue 
-for when a trackChannel prop is deleted, 
-leaving the wrong key name for all props. 
-Basically, every trackChannel prop gets a renamed key that coincides with their "index value" so to speak.
-For example, {track0: Channel, track2: Channel, track3: Channel} 
-becomes {track0: Channel, track1: Channel, track2: Channel} */
-function renameKeys(obj) {
-  const keyValues = Object.keys(obj).map((key, index) => {
-    const newKey = "track" + index || key;
-    return { [newKey]: obj[key] };
-  });
-  return Object.assign({}, ...keyValues);
-}
-
-/************* Helper Functions End **************/
-
 export default function App() {
   const [title, setTitle] = useState("Untitled 1");
 
@@ -493,7 +76,6 @@ export default function App() {
   const tracks = useRef();
   if (!tracks.current)
     tracks.current = [
-      // I might have to use this for tracks instead of a sample bank
       {
         group: "bass",
         sample: makePlayer(sampleRef.bass.BS1).connect(
@@ -656,7 +238,7 @@ export default function App() {
     }
 
     // Updates the sequence to be used for Tone.Sequence with the new sample from the updated grid
-    sequence.current = []; // I might have to turn this all into a function since the lines of code below are used more than once in this program
+    sequence.current = [];
     newGrid.map((column) => {
       let active = [];
       column.map((cell) => {
@@ -717,7 +299,7 @@ export default function App() {
     }
 
     // Updates the sequence to be used for Tone.Sequence with the new sample from the updated grid
-    sequence.current = []; // I might have to turn this all into a function since the lines of code below are used more than once in this program
+    sequence.current = [];
     newGrid.map((column) => {
       let active = [];
       column.map((cell) => {
@@ -868,7 +450,7 @@ export default function App() {
       newColumn.splice(trackClicked, 1);
       return newColumn;
     });
-    // This adds a new tracksSelect object
+    // This creates a copy of tracksSelect and removes a selected track
     newTrackActive = [...tracksSelect];
     newTrackActive.splice(trackClicked, 1);
     // This removes a new tracksMute object on the selected track
